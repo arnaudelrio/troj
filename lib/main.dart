@@ -28,7 +28,7 @@ class _MainScreenState extends State<MainScreen> {
   late GameTurn gameTurn;
   late Player turn;
   late String text;
-  late Bool win;
+  late bool win;
 
   @override
   void initState() {
@@ -55,10 +55,11 @@ class _MainScreenState extends State<MainScreen> {
       }
       if (checkIfFull(gameTurn: gameTurn)) {
         text = "No more places!";
+        win = true;
       };
       Player? winner = checkWinner(gameTurn: gameTurn);
       if (winner != null) {
-        text = "Player ${winner} wins!";
+        text = "Player ${winner == Player.x ? 'X' : 'O'} wins!";
         win = true;
       };
     });
@@ -106,6 +107,22 @@ class _MainScreenState extends State<MainScreen> {
                   child: Text(text),
                 )
               ]
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      gameTurn = newGame();
+                      turn = Player.x;
+                      text = "";
+                      win = false;
+                    });
+                  },
+                  child: const Text('Reset'),
+                ),
+              ],
             ),
           ],
         ),

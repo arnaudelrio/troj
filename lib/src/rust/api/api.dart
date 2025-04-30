@@ -7,9 +7,6 @@ import '../frb_generated.dart';
 import 'game.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-String greet({required String name}) =>
-    RustLib.instance.api.crateApiApiGreet(name: name);
-
 Cell switchFn({required Cell cell}) =>
     RustLib.instance.api.crateApiApiSwitchFn(cell: cell);
 
