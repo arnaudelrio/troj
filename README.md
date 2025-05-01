@@ -8,3 +8,5 @@ The main logic is written in rust and in the `rust/src/` folder, and the flutter
 Using the `flutter_rust_bridge` utility, rust code is converted to `.dart`files (under the `lib/src/rust/` folder).
 
 To update the rust code to access the methods from flutter, you need the `flutter_rust_bridge_codegen` utility, with the subcommand `generate`.
+
+To build with the image icon, run: `flutter pub get`, then `flutter pub run flutter_laucher_icons`, and then the `flutter build <DESTINATION>`.
