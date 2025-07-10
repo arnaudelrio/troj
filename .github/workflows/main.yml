@@ -30,14 +30,8 @@ jobs:
           flutter_rust_bridge_codegen generate \
             --config-file flutter_rust_bridge.yaml
 
-      - name: Build Rust library
-        run: |
-          cd rust
-          cargo build --release
-
       - name: Build Flutter app
         run: |
-          cd flutter
           flutter pub get
           flutter build apk
 
