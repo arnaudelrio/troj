@@ -1,0 +1,54 @@
+name: Rust & Flutter CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  generate-bridge-bindings:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0' # specify your Flutter version
+
+      - name: Install rust_flutter_bridge_codegen
+        run: cargo install flutter_rust_bridge_codegen
+
+      - name: Generate bridge bindings
+        run: |
+          cd rust
+          flutter_rust_bridge_codegen \
+            --rust-input src/api.rs \
+            --dart-output ../flutter/lib/bridge_generated.dart
+
+      - name: Build Rust library
+        run: |
+          cd rust
+          cargo build --release
+
+      - name: Build Flutter app
+        run: |
+          cd flutter
+          flutter pub get
+          flutter build apk
+
+      - name: Run Rust tests
+        run: |
+          cd rust
+          cargo test
+
+      - name: Run Flutter tests
+        run: |
+          cd flutter
+          flutter test
