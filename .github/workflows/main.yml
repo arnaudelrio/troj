@@ -28,7 +28,8 @@ jobs:
       - name: Generate bridge bindings
         run: |
           cd rust
-          flutter_rust_bridge_codegen generate
+          flutter_rust_bridge_codegen generate \
+            --config-file flutter_rust_bridge.yaml
 
       - name: Build Rust library
         run: |
