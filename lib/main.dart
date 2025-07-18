@@ -14,7 +14,29 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+        useMaterial3: true,
+        scaffoldBackgroundColor: Colors.grey[100],
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.deepPurple,
+          foregroundColor: Colors.white,
+          elevation: 2,
+        ),
+        elevatedButtonTheme: ElevatedButtonThemeData(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.deepPurple,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+            textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ),
       home: MainScreen(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
@@ -47,10 +69,7 @@ class _MainScreenState extends State<MainScreen> {
       if (gameTurn.board[row][col] != Cell.empty()) {
         return;
       } else {
-        // gameTurn.board[row][col] = makeMove(cell: gameTurn.board[row][col], turn: gameTurn.turn);
         gameTurn.board[row][col] = makeMove(cell: gameTurn.board[row][col], turn: turn);
-        // gameTurn.turn = switchTurn(turn: gameTurn.turn);
-        // gameTurn.turn = Player.o;
         turn = switchTurn(turn: turn);
       }
       if (checkIfFull(gameTurn: gameTurn)) {
@@ -65,53 +84,136 @@ class _MainScreenState extends State<MainScreen> {
     });
   }
 
+  Widget _buildCell(int row, int col) {
+    final cell = gameTurn.board[row][col];
+    String symbol = ' ';
+    Color? symbolColor;
+    if (cell == Cell_Filled(Player.x)) {
+      symbol = 'X';
+      symbolColor = Colors.deepPurple;
+    } else if (cell == Cell_Filled(Player.o)) {
+      symbol = 'O';
+      symbolColor = Colors.orange[700];
+    }
+
+    return GestureDetector(
+      onTap: () => _handleTap(row, col),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        width: 90,
+        height: 90,
+        margin: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.deepPurple.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 2),
+            ),
+          ],
+          border: Border.all(
+            color: Colors.deepPurple.withOpacity(0.3),
+            width: 2,
+          ),
+        ),
+        child: Center(
+          child: AnimatedDefaultTextStyle(
+            duration: const Duration(milliseconds: 200),
+            style: TextStyle(
+              fontSize: 48,
+              fontWeight: FontWeight.bold,
+              color: symbolColor ?? Colors.grey[400],
+              letterSpacing: 2,
+            ),
+            child: Text(symbol),
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(title: const Text('TROJ')),
-        body: Column(
-          children: [
-            for (int row = 0; row < 3; row++)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('TROJ', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 2)),
+        centerTitle: true,
+      ),
+      body: Center(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 16.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
               children: [
-                for (int col = 0; col < 3; col++)
-                  GestureDetector(
-                    onTap: () => _handleTap(row, col),
-                    child: Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        border: Border.all(),
+                Container(
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  child: Text(
+                    "Turn: ${turn == Player.x ? 'X' : 'O'}",
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w600,
+                      color: turn == Player.x ? Colors.deepPurple : Colors.orange[700],
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                ),
+                Container(
+                  decoration: BoxDecoration(
+                    color: Colors.deepPurple[50],
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.deepPurple.withOpacity(0.04),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
-                      child: Center(
-                        child: Text(gameTurn.board[row][col] == Cell.empty() ? ' ' : (gameTurn.board[row][col] == Cell_Filled(Player.x) ? 'X' : 'O')),
+                    ],
+                  ),
+                  padding: const EdgeInsets.all(12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      for (int row = 0; row < 3; row++)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            for (int col = 0; col < 3; col++)
+                              _buildCell(row, col),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 24),
+                AnimatedOpacity(
+                  opacity: text.isNotEmpty ? 1.0 : 0.0,
+                  duration: const Duration(milliseconds: 300),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                    decoration: BoxDecoration(
+                      color: win
+                          ? (text.contains("wins") ? Colors.green[100] : Colors.orange[100])
+                          : Colors.transparent,
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      text,
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w500,
+                        color: win
+                            ? (text.contains("wins") ? Colors.green[900] : Colors.orange[900])
+                            : Colors.deepPurple,
+                        letterSpacing: 1,
                       ),
                     ),
-                  )
-              ],
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Text("Turn: ${turn == Player.x ? 'X' : 'O'}"),
-                )
-              ]
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Center(
-                  child: Text(text),
-                )
-              ]
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ElevatedButton(
+                  ),
+                ),
+                const SizedBox(height: 28),
+                ElevatedButton.icon(
                   onPressed: () {
                     setState(() {
                       gameTurn = newGame();
@@ -120,11 +222,21 @@ class _MainScreenState extends State<MainScreen> {
                       win = false;
                     });
                   },
-                  child: const Text('Reset'),
+                  icon: const Icon(Icons.refresh),
+                  label: const Text('Reset'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                    textStyle: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
                 ),
               ],
             ),
-          ],
+          ),
         ),
       ),
     );
